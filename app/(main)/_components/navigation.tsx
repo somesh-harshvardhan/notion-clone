@@ -1,3 +1,4 @@
+"use client";
 import { cn } from "@/lib/utils";
 import {
   ChevronsLeft,
@@ -8,7 +9,7 @@ import {
   Settings,
   Trash,
 } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import React, { ElementRef, useEffect, useRef, useState } from "react";
 import { useMediaQuery } from "usehooks-ts";
 import { UserItem } from "./user-item";
@@ -23,7 +24,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { TrashBox } from "./trash-box";
+import useSearch from "@/hooks/use-search";
+import { useSettings } from "@/hooks/use-settings";
+import Navbar from "./navbar";
 export const Navigation = () => {
+  const settings = useSettings();
+  const search = useSearch((store) => store);
+  const params = useParams();
   const pathname = usePathname();
   const isMobile = useMediaQuery("(max-width: 768px)");
   const create = useMutation(api.documents.create);
@@ -31,8 +38,8 @@ export const Navigation = () => {
   const isResizingRef = useRef(false);
   const sidebarRef = useRef<ElementRef<"aside">>(null);
   const navbarRef = useRef<ElementRef<"div">>(null);
-  const [isResetting, setIsResetting] = useState<Boolean>(false);
-  const [isCollapsed, setIsCollapsed] = useState<Boolean>(false);
+  const [isResetting, setIsResetting] = useState<boolean>(false);
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
 
   useEffect(() => {
     if (isMobile) {
@@ -138,8 +145,8 @@ export const Navigation = () => {
         </div>
         <div>
           <UserItem />
-          <Item label="Search" icon={Search} isSearch onClick={() => {}} />
-          <Item label="Settings" icon={Settings} onClick={() => {}} />
+          <Item label="Search" icon={Search} isSearch onClick={search.onOpen} />
+          <Item label="Settings" icon={Settings} onClick={settings.onOpen} />
           <Item
             level={0}
             onClick={handleCreate}
@@ -150,7 +157,7 @@ export const Navigation = () => {
         <div className=" mt-4">
           <DocumentList level={1} />
           <Item onClick={handleCreate} icon={Plus} label="Add a page" />
-          <Popover open>
+          <Popover>
             <PopoverTrigger className=" w-full mt-4">
               <Item label="Trash" icon={Trash} />
             </PopoverTrigger>
@@ -176,14 +183,18 @@ export const Navigation = () => {
           isMobile && " left-0 w-full"
         )}
       >
-        <nav className=" bg-transparent px-3 py-2 w-full">
-          {isCollapsed && (
-            <MenuIcon
-              className=" h-6 w-6 text-muted-foreground"
-              role="button"
-            />
-          )}
-        </nav>
+        {!!params.documentId ? (
+          <Navbar isCollapsed={isCollapsed} onResetWidth={resetWidth} />
+        ) : (
+          <nav className=" bg-transparent px-3 py-2 w-full">
+            {isCollapsed && (
+              <MenuIcon
+                className=" h-6 w-6 text-muted-foreground"
+                role="button"
+              />
+            )}
+          </nav>
+        )}
       </div>
     </>
   );

@@ -49,7 +49,6 @@ export const DocumentList = ({
       </>
     );
   }
-  console.log(expanded);
   return (
     <>
       <p
